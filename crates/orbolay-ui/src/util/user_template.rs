@@ -17,7 +17,7 @@ use orbolay_logging::warn;
 use scraper::{Html, Selector};
 
 use crate::util::html_template::{
-  escape_html, is_network_url, merge_classes, render_tag, theme_decls,
+  escape_attr, escape_html, is_network_url, merge_classes, render_tag, theme_decls,
 };
 use crate::util::theme::Theme;
 
@@ -319,6 +319,10 @@ fn avatar_url(user: &User) -> String {
     return String::new();
   }
 
+  if user.source.is_teamspeak() {
+    return escape_attr(&user.avatar);
+  }
+
   format!(
     "https://cdn.discordapp.com/avatars/{}/{}.png?size=160",
     user.id, user.avatar
@@ -359,6 +363,17 @@ mod tests {
     let html = render(VoiceSource::TeamSpeak6);
     assert!(html.contains("<span class=\"source-badge\">TS6</span>"));
     assert!(render(VoiceSource::TeamSpeak3).contains(">TS3</span>"));
+  }
+
+  #[test]
+  fn teamspeak_avatars_use_their_url_and_discord_avatars_use_the_cdn() {
+    let mut teamspeak = user(VoiceSource::TeamSpeak6);
+    teamspeak.avatar = "https://example.com/a?b=1&c=2".to_string();
+    assert_eq!(avatar_url(&teamspeak), "https://example.com/a?b=1&amp;c=2");
+
+    let mut discord = user(VoiceSource::Discord);
+    discord.avatar = "hash".to_string();
+    assert!(avatar_url(&discord).starts_with("https://cdn.discordapp.com/avatars/"));
   }
 
   #[test]
