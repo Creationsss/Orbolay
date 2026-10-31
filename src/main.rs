@@ -310,6 +310,7 @@ fn app() -> impl IntoElement {
     let shared_sync = shared.clone();
     spawn_in_window(async move {
       while let Ok(()) = redraw_rx.recv_async().await {
+        while redraw_rx.try_recv().is_ok() {}
         let synced = shared_sync.read().unwrap().clone();
         let transport_sender = app_state.read().transport_sender.clone();
         let is_open = app_state.read().is_open;
