@@ -6,6 +6,7 @@ rust-version = "1.95"
 
 [dependencies]
 chrono = { workspace = true }
+dirs = { workspace = true }
 flume = { workspace = true }
 interprocess = { workspace = true }
 notify = { workspace = true }

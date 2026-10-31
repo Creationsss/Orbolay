@@ -20,7 +20,9 @@ use orbolay_core::{
 };
 use orbolay_keys::KeyEvent;
 use orbolay_logging::{log, warn};
-use orbolay_transport::{create_transport_thread, maybe_notify_update, start_config_watcher};
+use orbolay_transport::{
+  create_transport_thread, maybe_notify_update, start_config_watcher, start_teamspeak_threads,
+};
 use orbolay_ui::{
   components::{MessagesSection, SettingsButton, Soundboard, VoiceControls, VoiceSection},
   config::CornerAlignment,
@@ -289,6 +291,7 @@ fn app() -> impl IntoElement {
     };
 
     create_transport_thread(app.clone(), args.port, force_transport, transport_recv);
+    start_teamspeak_threads(app.clone());
     create_notification_thread(app.clone());
 
     app.notify(Notification {
