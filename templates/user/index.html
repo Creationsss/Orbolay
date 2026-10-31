@@ -64,6 +64,10 @@
         border-color: #439378;
       }
 
+      #user.teamspeak.speaking .ring {
+        border-color: #2580c3;
+      }
+
       #user.muted .ring,
       #user.deafened .ring {
         border-color: #da3e44;
@@ -90,6 +94,17 @@
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
+      }
+
+      .source-badge {
+        flex: none;
+        background: #2580c3;
+        border-radius: 4px;
+        color: #ffffff;
+        font-size: 10px;
+        font-weight: 700;
+        line-height: 12px;
+        padding: 1px 4px;
       }
 
       .status-icons {
@@ -119,6 +134,7 @@
       </span>
       <span class="name">
         <span class="name-text">{{name}}</span>
+        {{source-badge}}
         <span class="status-icons">
           {{muted-icon}}
           {{deafened-icon}}

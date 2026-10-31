@@ -11,7 +11,7 @@ use std::{
 use orbolay_core::{
   config::config_dir,
   dirs::{TEMPLATES_DIR, USER_TEMPLATES},
-  user::{User, UserVoiceState},
+  user::{User, UserVoiceState, VoiceSource},
 };
 use orbolay_logging::warn;
 use scraper::{Html, Selector};
@@ -31,6 +31,7 @@ const MUTED_ICON_TOKEN: &str = "{{muted-icon}}";
 const DEAFENED_ICON_TOKEN: &str = "{{deafened-icon}}";
 const STREAMING_ICON_TOKEN: &str = "{{streaming-icon}}";
 const CAMERA_ICON_TOKEN: &str = "{{camera-icon}}";
+const SOURCE_BADGE_TOKEN: &str = "{{source-badge}}";
 
 const MUTED_ICON: &str = include_str!("../../../../assets/muted.svg");
 const DEAFENED_ICON: &str = include_str!("../../../../assets/deafened.svg");
@@ -197,6 +198,7 @@ impl UserTemplate {
       CAMERA_ICON_TOKEN,
       &status_icon(user.camera, "camera", CAMERA_ICON),
     );
+    html = html.replace(SOURCE_BADGE_TOKEN, &source_badge(user.source));
     html
   }
 }
@@ -207,6 +209,13 @@ fn status_icon(active: bool, state: &str, svg: &str) -> String {
   } else {
     String::new()
   }
+}
+
+fn source_badge(source: VoiceSource) -> String {
+  source
+    .badge()
+    .map(|label| format!("<span class=\"source-badge\">{label}</span>"))
+    .unwrap_or_default()
 }
 
 fn preprocess(raw: &str) -> Result<UserTemplate, String> {
@@ -273,7 +282,11 @@ fn preprocess(raw: &str) -> Result<UserTemplate, String> {
 }
 
 pub fn user_template_classes(user: &User) -> Vec<&'static str> {
-  let mut classes = Vec::new();
+  let mut classes = vec![user.source.css_class()];
+
+  if user.source.is_teamspeak() {
+    classes.push("teamspeak");
+  }
 
   match user.voice_state {
     UserVoiceState::Speaking => classes.push("speaking"),
@@ -310,4 +323,52 @@ fn avatar_url(user: &User) -> String {
     "https://cdn.discordapp.com/avatars/{}/{}.png?size=160",
     user.id, user.avatar
   )
+}
+
+#[cfg(test)]
+mod tests {
+  use super::*;
+  use crate::util::theme::{Theme, from_tuple};
+
+  fn user(source: VoiceSource) -> User {
+    User {
+      name: "Someone".to_string(),
+      id: "ts6:1:5".to_string(),
+      avatar: String::new(),
+      voice_state: UserVoiceState::Speaking,
+      streaming: false,
+      camera: false,
+      volume: 100.,
+      speaking_epoch: 0,
+      source,
+      is_local: false,
+    }
+  }
+
+  fn render(source: VoiceSource) -> String {
+    let theme = Theme::from_values(from_tuple((0, 0, 0)), from_tuple((255, 255, 255)), 10.);
+    default_template().render(&user(source), &theme, false)
+  }
+
+  #[test]
+  fn teamspeak_users_are_marked_and_badged() {
+    let classes = user_template_classes(&user(VoiceSource::TeamSpeak6));
+    assert!(classes.contains(&"teamspeak"));
+    assert!(classes.contains(&"teamspeak6"));
+
+    let html = render(VoiceSource::TeamSpeak6);
+    assert!(html.contains("<span class=\"source-badge\">TS6</span>"));
+    assert!(render(VoiceSource::TeamSpeak3).contains(">TS3</span>"));
+  }
+
+  #[test]
+  fn discord_users_have_no_badge() {
+    let classes = user_template_classes(&user(VoiceSource::Discord));
+    assert!(classes.contains(&"discord"));
+    assert!(!classes.contains(&"teamspeak"));
+
+    let html = render(VoiceSource::Discord);
+    assert!(!html.contains("<span class=\"source-badge\""));
+    assert!(!html.contains(SOURCE_BADGE_TOKEN));
+  }
 }
