@@ -121,6 +121,7 @@ impl Roster {
           camera: false,
           volume: 100.,
           speaking_epoch: 0,
+          grace_until: None,
           source: self.source,
           is_local: *client_id == connection.own_client,
         });
@@ -235,7 +236,8 @@ pub(crate) mod tests {
     let mut state = AppState::new();
     configure(&mut state);
     let (redraw_tx, _) = flume::unbounded();
-    AppHandle::new(Arc::new(RwLock::new(state)), redraw_tx)
+    let (open_config_tx, _) = flume::unbounded();
+    AppHandle::new(Arc::new(RwLock::new(state)), redraw_tx, open_config_tx)
   }
 
   pub fn roster_with(source: VoiceSource, own_client: u64, clients: &[(u64, u64)]) -> Roster {

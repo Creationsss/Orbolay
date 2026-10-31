@@ -344,6 +344,7 @@ mod tests {
       camera: false,
       volume: 100.,
       speaking_epoch: 0,
+      grace_until: None,
       source,
       is_local: false,
     }

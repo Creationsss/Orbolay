@@ -1,3 +1,5 @@
+use std::time::Instant;
+
 #[derive(Clone, Debug, PartialEq, Default)]
 pub enum PremiumType {
   #[default]
@@ -106,6 +108,7 @@ pub struct User {
   pub speaking_epoch: u64,
   pub source: VoiceSource,
   pub is_local: bool,
+  pub grace_until: Option<Instant>,
 }
 
 use crate::payloads::WsVoiceState;
@@ -126,6 +129,7 @@ impl From<WsVoiceState> for User {
       speaking_epoch: 0,
       source: VoiceSource::Discord,
       is_local: false,
+      grace_until: None,
     }
   }
 }
@@ -164,6 +168,7 @@ impl From<RpcVoiceState> for User {
       speaking_epoch: 0,
       source: VoiceSource::Discord,
       is_local: false,
+      grace_until: None,
     }
   }
 }
