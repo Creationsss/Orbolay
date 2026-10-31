@@ -249,6 +249,37 @@ fn configurator(app: AppHandle, standalone: bool) -> impl IntoElement {
         disabled: false,
       }
     )
+    .child(divider())
+    .child(SettingRow {
+      name: "Enable TeamSpeak 3".into(),
+      description: Some("Show users from your current TeamSpeak 3 channel. Requires the ClientQuery plugin.".into()),
+      kind: SettingKind::Toggle(config.teamspeak3_enabled),
+      on_change: make_bool_updater(app.clone(), local_config, |cfg, value| {
+        cfg.teamspeak3_enabled = value;
+      }),
+      disabled: false,
+    })
+    .child(divider())
+    .child(SettingRow {
+      name: "TeamSpeak 3 API Key".into(),
+      description: Some("Leave empty to read it from clientquery.ini. Found under Tools > Options > Addons > ClientQuery.".into()),
+      kind: SettingKind::Input(config.teamspeak3_api_key.clone()),
+      on_change: make_updater(app.clone(), local_config, |cfg, v| {
+        let key = v.trim();
+        cfg.teamspeak3_api_key = (!key.is_empty()).then(|| key.to_string());
+      }),
+      disabled: !config.teamspeak3_enabled,
+    })
+    .child(divider())
+    .child(SettingRow {
+      name: "Enable TeamSpeak 6".into(),
+      description: Some("Show users from your current TeamSpeak 6 channel. TeamSpeak will ask you to allow Orbolay the first time it connects.".into()),
+      kind: SettingKind::Toggle(config.teamspeak6_enabled),
+      on_change: make_bool_updater(app.clone(), local_config, |cfg, value| {
+        cfg.teamspeak6_enabled = value;
+      }),
+      disabled: false,
+    })
     .child(divider());
 
   #[cfg(not(target_os = "macos"))]
