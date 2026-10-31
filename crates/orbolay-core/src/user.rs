@@ -35,6 +35,13 @@ pub enum UserVoiceState {
   Deafened,
 }
 
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub enum VoiceSource {
+  Discord,
+  TeamSpeak3,
+  TeamSpeak6,
+}
+
 impl UserVoiceState {
   pub fn from_flags(deafened: bool, muted: bool, speaking: bool) -> Self {
     if deafened {
@@ -49,6 +56,44 @@ impl UserVoiceState {
   }
 }
 
+impl VoiceSource {
+  pub fn is_teamspeak(&self) -> bool {
+    !matches!(self, VoiceSource::Discord)
+  }
+
+  pub fn id_prefix(&self) -> &'static str {
+    match self {
+      VoiceSource::Discord => "discord",
+      VoiceSource::TeamSpeak3 => "ts3",
+      VoiceSource::TeamSpeak6 => "ts6",
+    }
+  }
+
+  pub fn css_class(&self) -> &'static str {
+    match self {
+      VoiceSource::Discord => "discord",
+      VoiceSource::TeamSpeak3 => "teamspeak3",
+      VoiceSource::TeamSpeak6 => "teamspeak6",
+    }
+  }
+
+  pub fn display_name(&self) -> &'static str {
+    match self {
+      VoiceSource::Discord => "Discord",
+      VoiceSource::TeamSpeak3 => "TeamSpeak 3",
+      VoiceSource::TeamSpeak6 => "TeamSpeak 6",
+    }
+  }
+
+  pub fn badge(&self) -> Option<&'static str> {
+    match self {
+      VoiceSource::Discord => None,
+      VoiceSource::TeamSpeak3 => Some("TS3"),
+      VoiceSource::TeamSpeak6 => Some("TS6"),
+    }
+  }
+}
+
 #[derive(Clone, Debug, PartialEq)]
 pub struct User {
   pub name: String,
@@ -59,6 +104,8 @@ pub struct User {
   pub camera: bool,
   pub volume: f32,
   pub speaking_epoch: u64,
+  pub source: VoiceSource,
+  pub is_local: bool,
 }
 
 use crate::payloads::WsVoiceState;
@@ -77,6 +124,8 @@ impl From<WsVoiceState> for User {
       camera: val.camera.unwrap_or_default(),
       volume: 100.,
       speaking_epoch: 0,
+      source: VoiceSource::Discord,
+      is_local: false,
     }
   }
 }
@@ -113,6 +162,8 @@ impl From<RpcVoiceState> for User {
       camera: false,
       volume: val.volume,
       speaking_epoch: 0,
+      source: VoiceSource::Discord,
+      is_local: false,
     }
   }
 }
