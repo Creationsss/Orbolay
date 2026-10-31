@@ -35,6 +35,20 @@ pub enum UserVoiceState {
   Deafened,
 }
 
+impl UserVoiceState {
+  pub fn from_flags(deafened: bool, muted: bool, speaking: bool) -> Self {
+    if deafened {
+      UserVoiceState::Deafened
+    } else if muted {
+      UserVoiceState::Muted
+    } else if speaking {
+      UserVoiceState::Speaking
+    } else {
+      UserVoiceState::NotSpeaking
+    }
+  }
+}
+
 #[derive(Clone, Debug, PartialEq)]
 pub struct User {
   pub name: String,
@@ -69,23 +83,17 @@ impl From<WsVoiceState> for User {
 
 impl From<WsVoiceState> for UserVoiceState {
   fn from(val: WsVoiceState) -> Self {
-    match (val.mute, val.deaf, val.speaking) {
-      (_, Some(true), _) => UserVoiceState::Deafened,
-      (Some(true), _, _) => UserVoiceState::Muted,
-      (_, _, Some(true)) => UserVoiceState::Speaking,
-      _ => UserVoiceState::NotSpeaking,
-    }
+    UserVoiceState::from(&val)
   }
 }
 
 impl From<&WsVoiceState> for UserVoiceState {
   fn from(val: &WsVoiceState) -> Self {
-    match (val.mute, val.deaf, val.speaking) {
-      (_, Some(true), _) => UserVoiceState::Deafened,
-      (Some(true), _, _) => UserVoiceState::Muted,
-      (_, _, Some(true)) => UserVoiceState::Speaking,
-      _ => UserVoiceState::NotSpeaking,
-    }
+    UserVoiceState::from_flags(
+      val.deaf == Some(true),
+      val.mute == Some(true),
+      val.speaking == Some(true),
+    )
   }
 }
 
@@ -111,24 +119,16 @@ impl From<RpcVoiceState> for User {
 
 impl From<RpcVoiceState> for UserVoiceState {
   fn from(val: RpcVoiceState) -> Self {
-    if val.voice_state.deaf || val.voice_state.self_deaf {
-      UserVoiceState::Deafened
-    } else if val.voice_state.mute || val.voice_state.self_mute {
-      UserVoiceState::Muted
-    } else {
-      UserVoiceState::NotSpeaking
-    }
+    UserVoiceState::from(&val)
   }
 }
 
 impl From<&RpcVoiceState> for UserVoiceState {
   fn from(val: &RpcVoiceState) -> Self {
-    if val.voice_state.deaf || val.voice_state.self_deaf {
-      UserVoiceState::Deafened
-    } else if val.voice_state.mute || val.voice_state.self_mute {
-      UserVoiceState::Muted
-    } else {
-      UserVoiceState::NotSpeaking
-    }
+    UserVoiceState::from_flags(
+      val.voice_state.deaf || val.voice_state.self_deaf,
+      val.voice_state.mute || val.voice_state.self_mute,
+      false,
+    )
   }
 }
