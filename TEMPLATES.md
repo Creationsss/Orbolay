@@ -23,7 +23,9 @@ If the template selected is invalid, Orbolay will log and the default will be us
 
 ## Root Element Attributes
 
-In addition to the state classes, the root element of a user template is given a `data-user-id` attribute containing the user's Discord ID. This can be used in CSS selectors to target a specific user (e.g. `#user[data-user-id="123456789"]`).
+In addition to the state classes, the root element of a user template is given:
+
+* `data-user-id` - the user's Discord ID, or `ts3:<connection>:<client>` / `ts6:<connection>:<client>` for TeamSpeak users. This can be used in CSS selectors to target a specific user (e.g. `#user[data-user-id="123456789"]`). TeamSpeak IDs change when the user reconnects.
 
 ## Substitution Keys
 
@@ -37,6 +39,7 @@ In order for your template to display the user name, avatar, etc., you will use 
 * `{{deafened-icon}}` - the deafened SVG icon, replaced with an empty string when the user is not deafened
 * `{{streaming-icon}}` - the streaming SVG icon, replaced with an empty string when the user is not streaming
 * `{{camera-icon}}` - the camera SVG icon, replaced with an empty string when the user does not have their camera on
+* `{{source-badge}}` - a `<span class="source-badge">` containing `TS3` or `TS6` for TeamSpeak users, replaced with an empty string for Discord users
 
 > [!NOTE]
 > Each status icon is injected as a `<span class="status-icon <state>">` wrapping an inline `<svg>`. Place the token wherever
@@ -84,6 +87,10 @@ required `id` attribute.
 * `camera` - the user has their camera on
 * `no-avatar` - there was an issue fetching the avatar or the user otherwise does not have one
 * `self` - the user is the current user
+* `discord` - the user is from Discord
+* `teamspeak` - the user is from TeamSpeak (any version)
+* `teamspeak3` - the user is from TeamSpeak 3
+* `teamspeak6` - the user is from TeamSpeak 6
 * `right` - the user list is being rendered on the right-hand side of the screen
 
 ### Notifications

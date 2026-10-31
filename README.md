@@ -82,6 +82,7 @@
   * [With Official Clients](#with-official-clients)
   * [With Modded Clients](#with-modded-clients)
 * [Command-line Controls](#command-line-controls) 
+* [TeamSpeak](#teamspeak)
 * [Using as a Wrapper Process](#using-as-a-wrapper-process)
 * [Custom Templates](#custom-templates)
 * [Configuration](#configuration)
@@ -96,6 +97,7 @@
 # Features
 
 * Voice channel member list and status (who is speaking/muted/deafened/etc)
+* TeamSpeak 3 and 6 users shown alongside Discord users
 * Custom notifications
 * Mute/deafen/disconnect controls
 * User volume control
@@ -181,6 +183,27 @@ orbolay --deafen
 ```
 
 \* *As a bonus, this can serve as a watered-down custom keybind provider for those of you on clients that do not support such a feature!*
+
+# TeamSpeak
+
+Orbolay can show the users in your current TeamSpeak channel alongside your Discord call. TeamSpeak users have a blue speaking ring and a `TS3` or `TS6` badge, where Discord users have a green ring and no badge. TeamSpeak 6 users show their myTeamSpeak avatar; TeamSpeak 3 users and avatars uploaded only to a server show a dark blue placeholder. If you are connected to several servers, the users from your channel on each one are shown.
+
+This is display only: the mute, deafen and disconnect controls, the soundboard and user volume still act on Discord.
+
+## TeamSpeak 3
+
+1. Make sure the ClientQuery plugin is enabled in TeamSpeak 3
+2. Turn on "Enable TeamSpeak 3" in the [configuration menu](#configuration)
+
+Orbolay reads the API key from `clientquery.ini`. If it cannot find the file (for example when running as a Flatpak), paste the key from Tools > Options > Addons > ClientQuery into "TeamSpeak 3 API Key".
+
+## TeamSpeak 6
+
+1. Make sure Remote Apps is enabled in TeamSpeak's settings
+2. Turn on "Enable TeamSpeak 6" in the [configuration menu](#configuration)
+3. Allow Orbolay when TeamSpeak asks
+
+If you changed the Remote Apps port from `5899`, set `teamspeak6Port` in `config.json`.
 
 # Using as a Wrapper Process
 
