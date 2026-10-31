@@ -358,7 +358,7 @@ fn app() -> impl IntoElement {
   });
 
   let state = app_state.read();
-  let voice_users = state.voice_users.clone();
+  let voice_users = state.all_voice_users();
   let messages = state.messages.clone();
   let messages_enabled = state.config.enable_message_notifications;
   let is_open = state.is_open;

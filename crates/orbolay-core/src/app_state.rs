@@ -6,7 +6,7 @@ use std::{
 use crate::{
   config::{Config, TransportMode},
   payloads::{Notification, SoundboardSoundPayload},
-  user::{PremiumType, User},
+  user::{PremiumType, User, VoiceSource},
   util::bridge::BridgeMessage,
 };
 
@@ -77,6 +77,7 @@ pub struct AppState {
   pub is_open: bool,
   pub is_censor: bool, // Used in modded clients but not IPC
   pub voice_users: Vec<User>,
+  pub teamspeak_users: Vec<User>,
   pub messages: Vec<Notification>,
   pub soundboard_cache: HashMap<String, Vec<SoundboardSoundPayload>>,
 
@@ -110,6 +111,7 @@ impl AppState {
       is_open: false,
       is_censor: false,
       voice_users: vec![],
+      teamspeak_users: vec![],
       messages: vec![],
       soundboard_cache: HashMap::new(),
 
@@ -125,6 +127,35 @@ impl AppState {
     if let Some(sender) = &self.transport_sender {
       sender.send(message).unwrap_or_default();
     }
+  }
+
+  pub fn all_voice_users(&self) -> Vec<User> {
+    self
+      .voice_users
+      .iter()
+      .cloned()
+      .map(|mut user| {
+        user.is_local = user.id == self.user_id;
+        user
+      })
+      .chain(self.teamspeak_users.iter().cloned())
+      .collect()
+  }
+
+  pub fn set_teamspeak_users(&mut self, source: VoiceSource, users: Vec<User>) -> bool {
+    let unchanged = self
+      .teamspeak_users
+      .iter()
+      .filter(|user| user.source == source)
+      .eq(users.iter());
+
+    if unchanged {
+      return false;
+    }
+
+    self.teamspeak_users.retain(|user| user.source != source);
+    self.teamspeak_users.extend(users);
+    true
   }
 
   pub fn notify(&mut self, notification: Notification) {
