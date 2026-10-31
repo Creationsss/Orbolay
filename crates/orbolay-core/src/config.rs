@@ -133,6 +133,16 @@ pub struct Config {
   pub user_template: Option<String>,
   #[serde(default)]
   pub notification_template: Option<String>,
+  #[serde(default)]
+  pub teamspeak3_enabled: bool,
+  #[serde(default)]
+  pub teamspeak3_api_key: Option<String>,
+  #[serde(default)]
+  pub teamspeak6_enabled: bool,
+  #[serde(default)]
+  pub teamspeak6_api_key: Option<String>,
+  #[serde(default)]
+  pub teamspeak6_port: Option<u16>,
 }
 
 impl Default for Config {
@@ -161,6 +171,11 @@ impl Default for Config {
       ui_scale: default_ui_scale(),
       user_template: None,
       notification_template: None,
+      teamspeak3_enabled: false,
+      teamspeak3_api_key: None,
+      teamspeak6_enabled: false,
+      teamspeak6_api_key: None,
+      teamspeak6_port: None,
     }
   }
 }
