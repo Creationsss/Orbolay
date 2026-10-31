@@ -10,13 +10,26 @@ use orbolay_core::{
 use orbolay_logging::{success, warn};
 
 mod client_query;
+mod remote_apps;
 
 const RETRY_INTERVAL: Duration = Duration::from_secs(5);
+const REJECTED_RETRY_INTERVAL: Duration = Duration::from_secs(60);
 const DISABLED_POLL_INTERVAL: Duration = Duration::from_secs(1);
 const CONNECT_TIMEOUT: Duration = Duration::from_secs(2);
 const READ_TIMEOUT: Duration = Duration::from_millis(200);
 
 pub(crate) type TsResult<T = ()> = Result<T, Box<dyn std::error::Error>>;
+
+#[derive(Debug)]
+pub(crate) struct Rejected(String);
+
+impl std::fmt::Display for Rejected {
+  fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    write!(f, "authorization rejected: {}", self.0)
+  }
+}
+
+impl std::error::Error for Rejected {}
 
 #[derive(Debug, Clone, PartialEq)]
 pub(crate) struct Client {
@@ -179,7 +192,11 @@ fn spawn_backend(app: AppHandle, source: VoiceSource, session: fn(&AppHandle) ->
             last_error = error;
           }
 
-          RETRY_INTERVAL
+          if e.is::<Rejected>() {
+            REJECTED_RETRY_INTERVAL
+          } else {
+            RETRY_INTERVAL
+          }
         }
       };
 
@@ -190,7 +207,12 @@ fn spawn_backend(app: AppHandle, source: VoiceSource, session: fn(&AppHandle) ->
 }
 
 pub fn start_teamspeak_threads(app: AppHandle) {
-  spawn_backend(app, VoiceSource::TeamSpeak3, client_query::run_session);
+  spawn_backend(
+    app.clone(),
+    VoiceSource::TeamSpeak3,
+    client_query::run_session,
+  );
+  spawn_backend(app, VoiceSource::TeamSpeak6, remote_apps::run_session);
 }
 
 #[cfg(test)]
