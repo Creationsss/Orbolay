@@ -152,15 +152,9 @@ pub fn load_user_template(name: Option<&str>) -> UserTemplate {
 }
 
 impl UserTemplate {
-  pub fn render(
-    &self,
-    user: &User,
-    is_self: bool,
-    theme: &Theme,
-    is_right_aligned: bool,
-  ) -> String {
+  pub fn render(&self, user: &User, theme: &Theme, is_right_aligned: bool) -> String {
     let root_tag = render_tag(&self.root_name, &self.root_attrs);
-    let mut state_classes = user_template_classes(user, is_self);
+    let mut state_classes = user_template_classes(user);
     if is_right_aligned {
       state_classes.push("right");
     }
@@ -278,7 +272,7 @@ fn preprocess(raw: &str) -> Result<UserTemplate, String> {
   })
 }
 
-pub fn user_template_classes(user: &User, is_self: bool) -> Vec<&'static str> {
+pub fn user_template_classes(user: &User) -> Vec<&'static str> {
   let mut classes = Vec::new();
 
   match user.voice_state {
@@ -300,7 +294,7 @@ pub fn user_template_classes(user: &User, is_self: bool) -> Vec<&'static str> {
     classes.push("no-avatar");
   }
 
-  if is_self {
+  if user.is_local {
     classes.push("self");
   }
 

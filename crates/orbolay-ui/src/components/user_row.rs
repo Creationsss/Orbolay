@@ -21,7 +21,6 @@ use crate::{
 pub struct UserRow {
   pub app_state: State<AppState>,
   pub user: User,
-  pub is_self: bool,
   pub is_open: bool,
   pub is_voice_semitransparent: bool,
   pub can_context_menu: bool,
@@ -54,17 +53,16 @@ impl Component for UserRow {
     let handle = use_html(|| HtmlSource::html(String::new()));
     let deps = (
       self.user.clone(),
-      self.is_self,
       self.theme,
       self.user_template.clone(),
       self.is_right_aligned,
     );
 
     use_side_effect_with_deps(&deps, move |deps| {
-      let (user, is_self, theme, user_template, is_right_aligned) = deps.clone();
+      let (user, theme, user_template, is_right_aligned) = deps.clone();
       let template = load_user_template(user_template.as_deref());
       let mut handle = handle;
-      handle.replace_html(template.render(&user, is_self, &theme, is_right_aligned));
+      handle.replace_html(template.render(&user, &theme, is_right_aligned));
     });
 
     rect()

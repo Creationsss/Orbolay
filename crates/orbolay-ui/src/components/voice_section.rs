@@ -72,10 +72,9 @@ impl Component for VoiceSection {
             u.name = censor(&u.name);
           }
 
-          let is_self = self.app_state.read().user_id == u.id;
           // TODO websocket cannot change user volume yet
           let can_context_menu =
-            !is_self && self.app_state.read().config.transport_mode == TransportMode::Ipc;
+            !u.is_local && self.app_state.read().config.transport_mode == TransportMode::Ipc;
           let is_voice_semitransparent = matches!(
             self.display_voice_members,
             DisplayVoiceMembers::AlwaysSemiTransparent
@@ -84,7 +83,6 @@ impl Component for VoiceSection {
           let row: Element = UserRow {
             app_state: self.app_state,
             user: u,
-            is_self,
             is_open: self.is_open,
             is_voice_semitransparent,
             can_context_menu,
