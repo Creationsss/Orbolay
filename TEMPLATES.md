@@ -35,9 +35,9 @@ In order for your template to display the user name, avatar, etc., you will use 
 
 * `{{avatar}}` - the avatar link, example usage: `<img src="{{avatar}}" />`
 * `{{name}}` - this is just text, example usage: `<span>{{name}}</span>`
+* `{{streaming}}` - a `<span />` containing the "LIVE" marking, example usage: `{{speaking}}`
 * `{{muted-icon}}` - the muted SVG icon, replaced with an empty string when the user is not muted
 * `{{deafened-icon}}` - the deafened SVG icon, replaced with an empty string when the user is not deafened
-* `{{streaming-icon}}` - the streaming SVG icon, replaced with an empty string when the user is not streaming
 * `{{camera-icon}}` - the camera SVG icon, replaced with an empty string when the user does not have their camera on
 * `{{source-badge}}` - a `<span class="source-badge">` containing `TS3` or `TS6` for TeamSpeak users, replaced with an empty string for Discord users
 
