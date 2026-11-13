@@ -115,6 +115,10 @@ fn default_true() -> bool {
   true
 }
 
+fn default_max_notifications() -> u32 {
+  3
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 #[serde(rename_all = "camelCase")]
 pub struct Config {
@@ -124,9 +128,17 @@ pub struct Config {
   #[serde(default)]
   pub display_idx: Option<usize>,
   #[serde(default)]
+  pub display_name: Option<String>,
+  #[serde(default)]
   pub port: Option<u16>,
   #[serde(default = "default_true")]
   pub enable_message_notifications: bool,
+  #[serde(default)]
+  pub show_voice_chat: bool,
+  #[serde(default = "default_max_notifications")]
+  pub max_notifications: u32,
+  #[serde(default)]
+  pub multiline_notification_bodies: bool,
   #[serde(default)]
   pub message_alignment: Option<String>,
   #[serde(default)]
@@ -185,8 +197,12 @@ impl Default for Config {
       #[cfg(not(target_os = "macos"))]
       overlay_keybind: default_overlay_keybind(),
       display_idx: None,
+      display_name: None,
       port: Some(6888),
       enable_message_notifications: true,
+      show_voice_chat: false,
+      max_notifications: default_max_notifications(),
+      multiline_notification_bodies: false,
       message_alignment: None,
       user_alignment: None,
       message_offset_x: 0,
@@ -213,6 +229,12 @@ impl Default for Config {
       teamspeak6_api_key: None,
       teamspeak6_port: None,
     }
+  }
+}
+
+impl Config {
+  pub fn voice_chat_enabled(&self) -> bool {
+    self.show_voice_chat && self.enable_message_notifications
   }
 }
 

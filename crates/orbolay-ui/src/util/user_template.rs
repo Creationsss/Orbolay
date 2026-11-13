@@ -323,15 +323,7 @@ fn avatar_url(user: &User) -> String {
     return escape_attr(&user.avatar);
   }
 
-  if user.avatar.is_empty() {
-    let index = user.id.parse::<u64>().map_or(0, |id| (id >> 22) % 6);
-    return format!("https://cdn.discordapp.com/embed/avatars/{index}.png");
-  }
-
-  format!(
-    "https://cdn.discordapp.com/avatars/{}/{}.png?size=160",
-    user.id, user.avatar
-  )
+  orbolay_core::user::avatar_url(&user.id, &user.avatar)
 }
 
 #[cfg(test)]

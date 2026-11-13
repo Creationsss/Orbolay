@@ -142,6 +142,7 @@ pub struct AppState {
   pub voice_users: Vec<User>,
   pub teamspeak_users: Vec<User>,
   pub messages: Vec<Notification>,
+  pub chat_messages: Vec<Notification>,
   pub soundboard_cache: HashMap<String, Vec<SoundboardSoundPayload>>,
 
   // Name caches
@@ -176,6 +177,7 @@ impl AppState {
       voice_users: vec![],
       teamspeak_users: vec![],
       messages: vec![],
+      chat_messages: vec![],
       soundboard_cache: HashMap::new(),
 
       guild_names: default_guild_names,
@@ -222,13 +224,40 @@ impl AppState {
   }
 
   pub fn notify(&mut self, notification: Notification) {
-    let messages_len = self.messages.len();
-
-    // Keep the last 3 elements
-    if messages_len > 3 {
-      self.messages.drain(0..messages_len - 3);
+    if notification.message_id.is_some()
+      && self
+        .chat_messages
+        .iter()
+        .any(|chat| chat.message_id == notification.message_id)
+    {
+      return;
     }
 
+    self.trim_rows(self.max_rows() - 1);
     self.messages.push(notification);
+  }
+
+  pub fn push_chat(&mut self, chat: Notification) {
+    self.trim_rows(self.max_rows() - 1);
+    self.chat_messages.push(chat);
+  }
+
+  pub fn trim_rows(&mut self, max: usize) {
+    while self.messages.len() + self.chat_messages.len() > max {
+      let chat_is_older = match (self.messages.first(), self.chat_messages.first()) {
+        (Some(message), Some(chat)) => chat.timestamp < message.timestamp,
+        (message, _) => message.is_none(),
+      };
+
+      if chat_is_older {
+        self.chat_messages.remove(0);
+      } else {
+        self.messages.remove(0);
+      }
+    }
+  }
+
+  pub fn max_rows(&self) -> usize {
+    self.config.max_notifications.clamp(1, 10) as usize
   }
 }

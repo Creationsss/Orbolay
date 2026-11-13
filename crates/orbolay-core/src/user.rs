@@ -155,10 +155,11 @@ impl From<RpcVoiceState> for User {
     let voice_state = UserVoiceState::from(&val);
 
     User {
-      name: val
-        .nick
-        .or(val.user.global_name)
-        .unwrap_or(val.user.username),
+      name: display_name(
+        val.nick.as_deref(),
+        val.user.global_name.as_deref(),
+        &val.user.username,
+      ),
       id: val.user.id,
       avatar: val.user.avatar.unwrap_or_default(),
       voice_state,
@@ -187,4 +188,22 @@ impl From<&RpcVoiceState> for UserVoiceState {
       false,
     )
   }
+}
+
+pub fn display_name(nick: Option<&str>, global_name: Option<&str>, username: &str) -> String {
+  [nick, global_name]
+    .into_iter()
+    .flatten()
+    .find(|name| !name.is_empty())
+    .unwrap_or(username)
+    .to_string()
+}
+
+pub fn avatar_url(user_id: &str, avatar: &str) -> String {
+  if avatar.is_empty() {
+    let index = user_id.parse::<u64>().map_or(0, |id| (id >> 22) % 6);
+    return format!("https://cdn.discordapp.com/embed/avatars/{index}.png");
+  }
+
+  format!("https://cdn.discordapp.com/avatars/{user_id}/{avatar}.png?size=160")
 }
